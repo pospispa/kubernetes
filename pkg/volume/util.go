@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/api/v1"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/release_1_5"
 	"k8s.io/kubernetes/pkg/fields"
@@ -344,4 +345,43 @@ func Zones2Set(zonesString string) (sets.String, error) {
 		zonesSet.Insert(trimmedZone)
 	}
 	return zonesSet, nil
+}
+
+// ValidatePVCSelector validates Selector part of a PVC:
+// - in case there is no Selector the PVC is valid
+// - makes sure that only allowedKeys are present in the Selector matchLabels part
+// - makes sure that only allowedKeys and allowedOperators are present in the Selector matchExpressions part
+// Return value:
+// - (true, nil) means PVC is valid (error == nil) and there is NO Selector OR (NO matchLabels AND NO matchExpressions) (bool == true)
+// - (false, nil) means PVC is valid (error == nil) and there is at least a value in matchLabels or matchExpressions specified (bool == false)
+// - (false, error) means PVC is not valid
+// - (true, error) shall never happen
+func ValidatePVCSelector(pvc *v1.PersistentVolumeClaim) (bool, error) {
+	allowedKeys := map[string]bool{unversioned.LabelZoneFailureDomain: true, unversioned.LabelZoneRegion: true}
+	allowedOperators := map[unversioned.LabelSelectorOperator]bool{unversioned.LabelSelectorOpIn: true, unversioned.LabelSelectorOpNotIn: true}
+	if pvc.Spec.Selector == nil {
+		return true, nil
+	}
+	if len(pvc.Spec.Selector.MatchExpressions) < 1 && len(pvc.Spec.Selector.MatchLabels) < 1 {
+		return true, nil
+	}
+	if len(pvc.Spec.Selector.MatchLabels) > 0 {
+		for label := range pvc.Spec.Selector.MatchLabels {
+			if !allowedKeys[label] {
+				return false, fmt.Errorf("key %q is not permitted in selector.matchLabels", label)
+			}
+		}
+	}
+	for _, expr := range pvc.Spec.Selector.MatchExpressions {
+		if !allowedKeys[expr.Key] {
+			return false, fmt.Errorf("key %q is not permitted in selector.matchExpressions", expr.Key)
+		}
+		if !allowedOperators[expr.Operator] {
+			return false, fmt.Errorf("operator %q is not permitted in selector.matchExpressions", expr.Operator)
+		}
+		if len(expr.Values) < 1 {
+			return false, fmt.Errorf("key %q, operator %q pair does not contain any value(s) in selector.matchExpressions", expr.Key, expr.Operator)
+		}
+	}
+	return false, nil
 }
