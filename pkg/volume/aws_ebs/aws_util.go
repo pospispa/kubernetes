@@ -96,7 +96,7 @@ func (util *AWSDiskUtil) CreateVolume(c *awsElasticBlockStoreProvisioner) (aws.K
 		case "type":
 			volumeOptions.VolumeType = v
 		case "zone":
-			volumeOptions.AvailabilityZone = v
+			volumeOptions.AvailabilityZones = v
 		case "iopspergb":
 			volumeOptions.IOPSPerGB, err = strconv.Atoi(v)
 			if err != nil {
