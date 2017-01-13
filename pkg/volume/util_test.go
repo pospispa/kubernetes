@@ -570,7 +570,7 @@ func isEqualSliceOfSets(s1, s2 []sets.String) bool {
 }
 
 func TestGetPVCMatchExpression(t *testing.T) {
-	functionUnderTest := "GetPVCMatchExpression"
+	functionUnderTest := "getPVCMatchExpression"
 	emptySet := make(sets.String)
 	// First part: want no error
 	succTests := []struct {
@@ -624,7 +624,7 @@ func TestGetPVCMatchExpression(t *testing.T) {
 		},
 	}
 	for _, succTest := range succTests {
-		if zones, err := GetPVCMatchExpression(&succTest.pvc, succTest.key, succTest.operator); err != nil {
+		if zones, err := getPVCMatchExpression(&succTest.pvc, succTest.key, succTest.operator); err != nil {
 			t.Errorf("%v(%v, %v, %v) returned (%v, %v), want (%v, %v)", functionUnderTest, succTest.pvc, succTest.key, succTest.operator, zones, err.Error(), succTest.want, nil)
 		} else if !isEqualSliceOfSets(zones, succTest.want) {
 			t.Errorf("%v(%v, %v, %v) returned (%v, %v), want (%v, %v)", functionUnderTest, succTest.pvc, succTest.key, succTest.operator, zones, err, succTest.want, nil)
@@ -712,7 +712,7 @@ func TestGetPVCMatchExpression(t *testing.T) {
 		},
 	}
 	for _, errCase := range errCases {
-		if zones, err := GetPVCMatchExpression(&errCase.pvc, errCase.key, errCase.operator); err == nil {
+		if zones, err := getPVCMatchExpression(&errCase.pvc, errCase.key, errCase.operator); err == nil {
 			t.Errorf("%v(%v, %v, %v) returned (%v, %v), want (%v, %v)", functionUnderTest, errCase.pvc, errCase.key, errCase.operator, zones, err, emptySet, "an error")
 		}
 	}

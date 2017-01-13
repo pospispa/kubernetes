@@ -421,7 +421,7 @@ func getPVCMatchLabel(pvc *v1.PersistentVolumeClaim, key string) (string, error)
 	return "", fmt.Errorf("key %q not found in selector.matchLabels", key)
 }
 
-// GetPVCMatchExpression returns:
+// getPVCMatchExpression returns:
 // - either ([]setOfValues, nil) for all matching (key, operator) from the matchExpressions Selector part of the PVC
 // - or ([]emptySet, error) in case the operator or the key is missing in the matchExpressions Selector part of the PVC
 // Example:
@@ -439,7 +439,7 @@ func getPVCMatchLabel(pvc *v1.PersistentVolumeClaim, key string) (string, error)
 //               - us-east-3a
 //               - us-east-4a
 // Returns (sets.String{"us-east-3a": sets.Empty{}}, nil) because all operators are ANDed.
-func GetPVCMatchExpression(pvc *v1.PersistentVolumeClaim, key string, operator metav1.LabelSelectorOperator) ([]sets.String, error) {
+func getPVCMatchExpression(pvc *v1.PersistentVolumeClaim, key string, operator metav1.LabelSelectorOperator) ([]sets.String, error) {
 	if pvc.Spec.Selector == nil {
 		return make([]sets.String, 0), fmt.Errorf("missing selector.matchExpressions")
 	}
@@ -557,12 +557,12 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 			zones = zones.Intersection(matchLabelRegionSet)
 		}
 	}
-	if matchExpressionZoneSets, err := GetPVCMatchExpression(input.PVC, metav1.LabelZoneFailureDomain, metav1.LabelSelectorOpIn); err == nil {
+	if matchExpressionZoneSets, err := getPVCMatchExpression(input.PVC, metav1.LabelZoneFailureDomain, metav1.LabelSelectorOpIn); err == nil {
 		for _, matchExpressionZoneSet := range matchExpressionZoneSets {
 			zones = zones.Intersection(matchExpressionZoneSet)
 		}
 	}
-	if matchExpressionRegionSets, err := GetPVCMatchExpression(input.PVC, metav1.LabelZoneRegion, metav1.LabelSelectorOpIn); err == nil {
+	if matchExpressionRegionSets, err := getPVCMatchExpression(input.PVC, metav1.LabelZoneRegion, metav1.LabelSelectorOpIn); err == nil {
 		if !gotAllAvailableZones {
 			if allAvailableZones, err = input.GetAllZones(); err != nil {
 				return emptySet, err
@@ -577,12 +577,12 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 			}
 		}
 	}
-	if matchExpressionZoneSets, err := GetPVCMatchExpression(input.PVC, metav1.LabelZoneFailureDomain, metav1.LabelSelectorOpNotIn); err == nil {
+	if matchExpressionZoneSets, err := getPVCMatchExpression(input.PVC, metav1.LabelZoneFailureDomain, metav1.LabelSelectorOpNotIn); err == nil {
 		for _, matchExpressionZoneSet := range matchExpressionZoneSets {
 			zones = zones.Difference(matchExpressionZoneSet)
 		}
 	}
-	if matchExpressionRegionSets, err := GetPVCMatchExpression(input.PVC, metav1.LabelZoneRegion, metav1.LabelSelectorOpNotIn); err == nil {
+	if matchExpressionRegionSets, err := getPVCMatchExpression(input.PVC, metav1.LabelZoneRegion, metav1.LabelSelectorOpNotIn); err == nil {
 		if !gotAllAvailableZones {
 			if allAvailableZones, err = input.GetAllZones(); err != nil {
 				return emptySet, err
