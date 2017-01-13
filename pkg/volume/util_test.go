@@ -501,7 +501,7 @@ func TestValidatePVCSelector(t *testing.T) {
 }
 
 func TestGetPVCMatchLabel(t *testing.T) {
-	functionUnderTest := "GetPVCMatchLabel"
+	functionUnderTest := "getPVCMatchLabel"
 	// First part: want no error
 	succTests := []struct {
 		pvc  v1.PersistentVolumeClaim
@@ -522,7 +522,7 @@ func TestGetPVCMatchLabel(t *testing.T) {
 		},
 	}
 	for _, succTest := range succTests {
-		if zone, err := GetPVCMatchLabel(&succTest.pvc, succTest.key); err != nil {
+		if zone, err := getPVCMatchLabel(&succTest.pvc, succTest.key); err != nil {
 			t.Errorf("%v(%v, %v) returned (%v, %v), want (%v, %v)", functionUnderTest, succTest.pvc, succTest.key, zone, err.Error(), succTest.want, nil)
 		}
 	}
@@ -551,7 +551,7 @@ func TestGetPVCMatchLabel(t *testing.T) {
 		},
 	}
 	for _, errCase := range errCases {
-		if zone, err := GetPVCMatchLabel(&errCase.pvc, errCase.key); err == nil {
+		if zone, err := getPVCMatchLabel(&errCase.pvc, errCase.key); err == nil {
 			t.Errorf("%v(%v, %v) returned (%v, %v), want (%v, %v)", functionUnderTest, errCase.pvc, errCase.key, zone, err, "", "an error")
 		}
 	}

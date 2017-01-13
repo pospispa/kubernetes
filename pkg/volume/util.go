@@ -408,10 +408,10 @@ func validatePVCSelector(pvc *v1.PersistentVolumeClaim) (bool, error) {
 	return false, nil
 }
 
-// GetPVCMatchLabel returns:
+// getPVCMatchLabel returns:
 // - either (value, nil) for the key from the matchLabels Selector part of the PVC
 // - or ("", error) in case the key is missing in the matchLabels Selector part of the PVC
-func GetPVCMatchLabel(pvc *v1.PersistentVolumeClaim, key string) (string, error) {
+func getPVCMatchLabel(pvc *v1.PersistentVolumeClaim, key string) (string, error) {
 	if pvc.Spec.Selector == nil {
 		return "", fmt.Errorf("missing selector.matchLabels")
 	}
@@ -537,12 +537,12 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 	} else if emptySelector {
 		return zones, nil
 	}
-	if matchLabelZone, err := GetPVCMatchLabel(input.PVC, metav1.LabelZoneFailureDomain); err == nil {
+	if matchLabelZone, err := getPVCMatchLabel(input.PVC, metav1.LabelZoneFailureDomain); err == nil {
 		matchLabelZoneSet := make(sets.String)
 		matchLabelZoneSet.Insert(matchLabelZone)
 		zones = zones.Intersection(matchLabelZoneSet)
 	}
-	if matchLabelRegion, err := GetPVCMatchLabel(input.PVC, metav1.LabelZoneRegion); err == nil {
+	if matchLabelRegion, err := getPVCMatchLabel(input.PVC, metav1.LabelZoneRegion); err == nil {
 		if !gotAllAvailableZones {
 			if allAvailableZones, err = input.GetAllZones(); err != nil {
 				return emptySet, err
