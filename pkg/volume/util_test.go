@@ -341,7 +341,7 @@ func TestZonesToSet(t *testing.T) {
 }
 
 func TestValidatePVCSelector(t *testing.T) {
-	functionUnderTest := "ValidatePVCSelector"
+	functionUnderTest := "validatePVCSelector"
 	// First part: want no error
 	succTests := []struct {
 		pvc       v1.PersistentVolumeClaim
@@ -431,7 +431,7 @@ func TestValidatePVCSelector(t *testing.T) {
 		},
 	}
 	for _, succTest := range succTests {
-		if empty, err := ValidatePVCSelector(&succTest.pvc); err != nil {
+		if empty, err := validatePVCSelector(&succTest.pvc); err != nil {
 			t.Errorf("%v(%v) returned (%v, %v), want (%v, %v)", functionUnderTest, succTest.pvc, empty, err.Error(), succTest.wantEmpty, nil)
 		} else if empty != succTest.wantEmpty {
 			t.Errorf("%v(%v) returned (%v, %v), want (%v, %v)", functionUnderTest, succTest.pvc, empty, err, succTest.wantEmpty, nil)
@@ -492,7 +492,7 @@ func TestValidatePVCSelector(t *testing.T) {
 		},
 	}
 	for _, errCase := range errCases {
-		if empty, err := ValidatePVCSelector(&errCase); err == nil {
+		if empty, err := validatePVCSelector(&errCase); err == nil {
 			t.Errorf("%v(%v) returned (%v, %v), want (%v, %v)", functionUnderTest, errCase, empty, err, false, "an error")
 		} else if empty != false {
 			t.Errorf("%v(%v) returned (%v, %v), want (%v, %v)", functionUnderTest, errCase, empty, err.Error(), false, "an error")

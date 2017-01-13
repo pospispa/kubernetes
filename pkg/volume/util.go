@@ -369,7 +369,7 @@ func zonesToSet(zonesString string) (sets.String, error) {
 	return zonesSet, nil
 }
 
-// ValidatePVCSelector validates Selector part of a PVC:
+// validatePVCSelector validates Selector part of a PVC:
 // - in case there is no Selector the PVC is valid
 // - makes sure that only allowedKeys are present in the Selector matchLabels part
 // - makes sure that only allowedKeys and allowedOperators are present in the Selector matchExpressions part
@@ -378,7 +378,7 @@ func zonesToSet(zonesString string) (sets.String, error) {
 // - (false, nil) means PVC is valid (error == nil) and there is at least a value in matchLabels or matchExpressions specified (bool == false)
 // - (false, error) means PVC is not valid
 // - (true, error) shall never happen
-func ValidatePVCSelector(pvc *v1.PersistentVolumeClaim) (bool, error) {
+func validatePVCSelector(pvc *v1.PersistentVolumeClaim) (bool, error) {
 	allowedKeys := map[string]bool{metav1.LabelZoneFailureDomain: true, metav1.LabelZoneRegion: true}
 	allowedOperators := map[metav1.LabelSelectorOperator]bool{metav1.LabelSelectorOpIn: true, metav1.LabelSelectorOpNotIn: true}
 	if pvc.Spec.Selector == nil {
@@ -532,7 +532,7 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 			return emptySet, fmt.Errorf("corresponding storage class error: %v", err.Error())
 		}
 	}
-	if emptySelector, err := ValidatePVCSelector(input.PVC); err != nil {
+	if emptySelector, err := validatePVCSelector(input.PVC); err != nil {
 		return emptySet, err
 	} else if emptySelector {
 		return zones, nil
