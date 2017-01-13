@@ -726,7 +726,7 @@ func mockZoneToRegion(zone string) (string, error) {
 }
 
 func TestRegionsToZones(t *testing.T) {
-	functionUnderTest := "RegionsToZones"
+	functionUnderTest := "regionsToZones"
 	// First part: want no error
 	tests := []struct {
 		regions           sets.String
@@ -772,7 +772,7 @@ func TestRegionsToZones(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		if got, err := RegionsToZones(tt.regions, tt.allAvailableZones, tt.zoneToRegion); err != nil {
+		if got, err := regionsToZones(tt.regions, tt.allAvailableZones, tt.zoneToRegion); err != nil {
 			t.Errorf("%v(%v, %v, %T) returned (%v, %v) want (%v, %v)", functionUnderTest, tt.regions, tt.allAvailableZones, tt.zoneToRegion, got, err, tt.want, nil)
 		} else if !got.Equal(tt.want) {
 			t.Errorf("%v(%v, %v, %T) returned (%v, %v) want (%v, %v)", functionUnderTest, tt.regions, tt.allAvailableZones, tt.zoneToRegion, got, err, tt.want, nil)
@@ -792,7 +792,7 @@ func TestRegionsToZones(t *testing.T) {
 		},
 	}
 	for _, errCase := range errCases {
-		if got, err := RegionsToZones(errCase.regions, errCase.allAvailableZones, errCase.zoneToRegion); err == nil {
+		if got, err := regionsToZones(errCase.regions, errCase.allAvailableZones, errCase.zoneToRegion); err == nil {
 			t.Errorf("%v(%v, %v, %T) returned (%v, %v) want (%q, %v)", functionUnderTest, errCase.regions, errCase.allAvailableZones, errCase.zoneToRegion, got, err, "", "an error")
 		}
 	}

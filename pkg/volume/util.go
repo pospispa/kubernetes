@@ -470,14 +470,14 @@ func getPVCMatchExpression(pvc *v1.PersistentVolumeClaim, key string, operator m
 	return ret, nil
 }
 
-// RegionsToZones converts a set of regions to a set of zones
+// regionsToZones converts a set of regions to a set of zones
 // Currently cloud providers do not provide a func RegionToZone that will return all zones that are available in a given region.
-// Thats why the func RegionsToZones goes through allAvailableZones and checks if the zone is in any of the being converted regions.
-func RegionsToZones(regions, allAvailableZones sets.String, zoneToRegion func(string) (string, error)) (sets.String, error) {
+// Thats why the func regionsToZones goes through allAvailableZones and checks if the zone is in any of the being converted regions.
+func regionsToZones(regions, allAvailableZones sets.String, zoneToRegion func(string) (string, error)) (sets.String, error) {
 	zones := make(sets.String)
 	for candidate := range allAvailableZones {
 		if candidatesRegion, err := zoneToRegion(candidate); err != nil {
-			return make(sets.String), fmt.Errorf("failed to convert zone (%v) to a region: %v", candidate, err)
+			return nil, fmt.Errorf("failed to convert zone (%v) to a region: %v", candidate, err)
 		} else if regions.Has(candidatesRegion) {
 			zones.Insert(candidate)
 		}
@@ -551,7 +551,7 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 		}
 		regions := make(sets.String)
 		regions.Insert(matchLabelRegion)
-		if matchLabelRegionSet, err := RegionsToZones(regions, allAvailableZones, input.ZoneToRegion); err != nil {
+		if matchLabelRegionSet, err := regionsToZones(regions, allAvailableZones, input.ZoneToRegion); err != nil {
 			return emptySet, err
 		} else {
 			zones = zones.Intersection(matchLabelRegionSet)
@@ -570,7 +570,7 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 			gotAllAvailableZones = true
 		}
 		for _, matchExpressionRegionSet := range matchExpressionRegionSets {
-			if matchExpressionZonesSet, err := RegionsToZones(matchExpressionRegionSet, allAvailableZones, input.ZoneToRegion); err != nil {
+			if matchExpressionZonesSet, err := regionsToZones(matchExpressionRegionSet, allAvailableZones, input.ZoneToRegion); err != nil {
 				return emptySet, err
 			} else {
 				zones = zones.Intersection(matchExpressionZonesSet)
@@ -590,7 +590,7 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 			gotAllAvailableZones = true
 		}
 		for _, matchExpressionRegionSet := range matchExpressionRegionSets {
-			if matchExpressionZonesSet, err := RegionsToZones(matchExpressionRegionSet, allAvailableZones, input.ZoneToRegion); err != nil {
+			if matchExpressionZonesSet, err := regionsToZones(matchExpressionRegionSet, allAvailableZones, input.ZoneToRegion); err != nil {
 				return emptySet, err
 			} else {
 				zones = zones.Difference(matchExpressionZonesSet)
