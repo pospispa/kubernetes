@@ -355,8 +355,8 @@ func UnmountViaEmptyDir(dir string, host VolumeHost, volName string, volSpec Spe
 	return wrapped.TearDownAt(dir)
 }
 
-// ZonesToSet converts a string containing a comma separated list of zones to set
-func ZonesToSet(zonesString string) (sets.String, error) {
+// zonesToSet converts a string containing a comma separated list of zones to set
+func zonesToSet(zonesString string) (sets.String, error) {
 	zonesSlice := strings.Split(zonesString, ",")
 	zonesSet := make(sets.String)
 	for _, zone := range zonesSlice {
@@ -528,7 +528,7 @@ func PutAdminAndUserRequestsTogether(input PutAdminAndUserRequestsTogetherParams
 		zones.Insert(input.SCZone)
 	}
 	if !input.IsSCZoneSpecified && input.IsSCZonesSpecified {
-		if zones, err = ZonesToSet(input.SCZones); err != nil {
+		if zones, err = zonesToSet(input.SCZones); err != nil {
 			return emptySet, fmt.Errorf("corresponding storage class error: %v", err.Error())
 		}
 	}
