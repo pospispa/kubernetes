@@ -270,3 +270,10 @@ func stringToSet(str, delimiter string) (sets.String, error) {
 	}
 	return zonesSet, nil
 }
+
+// IsPVCBeingDeleted returns:
+// true: in case PVC is being deleted, i.e. ObjectMeta.DeletionTimestamp is set
+// false: in case PVC is not being deleted, i.e. ObjectMeta.DeletionTimestamp is nil
+func IsPVCBeingDeleted(pvc *v1.PersistentVolumeClaim) bool {
+	return pvc.ObjectMeta.DeletionTimestamp != nil
+}

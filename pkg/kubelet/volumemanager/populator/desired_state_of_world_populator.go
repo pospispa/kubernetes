@@ -31,7 +31,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apiserver/pkg/util/feature"
 	clientset "k8s.io/client-go/kubernetes"
+	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/kubelet/config"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/pod"
@@ -39,6 +41,7 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/util/format"
 	"k8s.io/kubernetes/pkg/kubelet/volumemanager/cache"
 	"k8s.io/kubernetes/pkg/volume"
+	volumeutil "k8s.io/kubernetes/pkg/volume/util"
 	volumetypes "k8s.io/kubernetes/pkg/volume/util/types"
 	"k8s.io/kubernetes/pkg/volume/util/volumehelper"
 )
@@ -391,7 +394,8 @@ func (dswp *desiredStateOfWorldPopulator) createVolumeSpec(
 }
 
 // getPVCExtractPV fetches the PVC object with the given namespace and name from
-// the API server extracts the name of the PV it is pointing to and returns it.
+// the API server, checks whether PVC is being deleted, extracts the name of the PV
+// it is pointing to and returns it.
 // An error is returned if the PVC object's phase is not "Bound".
 func (dswp *desiredStateOfWorldPopulator) getPVCExtractPV(
 	namespace string, claimName string) (string, types.UID, error) {
@@ -403,6 +407,16 @@ func (dswp *desiredStateOfWorldPopulator) getPVCExtractPV(
 			namespace,
 			claimName,
 			err)
+	}
+
+	if !feature.DefaultFeatureGate.Enabled(features.PVCFinalizingController) {
+		// pods that uses a PVC that is being deleted must not be started
+		if volumeutil.IsPVCBeingDeleted(pvc) {
+			return "", "", fmt.Errorf(
+				"can't start pod because PVC %s/%s is being deleted",
+				namespace,
+				claimName)
+		}
 	}
 
 	if pvc.Status.Phase != v1.ClaimBound || pvc.Spec.VolumeName == "" {

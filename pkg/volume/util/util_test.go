@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -263,3 +264,36 @@ func TestZonesToSet(t *testing.T) {
 		}
 	}
 }
+
+func TestIsPVCBeingDeleted(t *testing.T) {
+	tests := []struct {
+		pvc  *v1.PersistentVolumeClaim
+		want bool
+	}{
+		{
+			pvc: &v1.PersistentVolumeClaim{
+				ObjectMeta: metav1.ObjectMeta{
+					DeletionTimestamp: nil,
+				},
+			},
+			want: false,
+		},
+		{
+			pvc: &v1.PersistentVolumeClaim{
+				ObjectMeta: metav1.ObjectMeta{
+					DeletionTimestamp: &arbitraryTime,
+				},
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		if got := IsPVCBeingDeleted(tt.pvc); got != tt.want {
+			t.Errorf("IsPVCBeingDeleted(%v) = %v WANT %v", tt.pvc, got, tt.want)
+		}
+	}
+}
+
+var (
+	arbitraryTime = metav1.Date(2017, 11, 1, 14, 28, 47, 0, time.FixedZone("CET", 0))
+)

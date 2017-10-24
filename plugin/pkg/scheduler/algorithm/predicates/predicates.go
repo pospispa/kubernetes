@@ -292,6 +292,15 @@ func (c *MaxPDVolumeCountChecker) filterVolumes(volumes []v1.Volume, namespace s
 				continue
 			}
 
+			if !utilfeature.DefaultFeatureGate.Enabled(features.PVCFinalizingController) {
+				if volumeutil.IsPVCBeingDeleted(pvc) {
+					// if the PVC is being deleted, log the error and count the PV towards the PV limit
+					glog.V(4).Infof("can't schedule pod because PVC %s/%s is being deleted", namespace, pvcName)
+					filteredVolumes[pvId] = true
+					continue
+				}
+			}
+
 			if pvc.Spec.VolumeName == "" {
 				// PVC is not bound. It was either deleted and created again or
 				// it was forcefuly unbound by admin. The pod can still use the
