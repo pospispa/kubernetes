@@ -203,7 +203,7 @@ const (
 	BlockVolume utilfeature.Feature = "BlockVolume"
 
 	// owner: @pospispa
-	// alpha: v1.9
+	// beta: v1.10
 	//
 	// Postpone deletion of a PV or a PVC when they are being used
 	StorageProtection utilfeature.Feature = "StorageProtection"
@@ -274,7 +274,7 @@ var defaultKubernetesFeatureGates = map[utilfeature.Feature]utilfeature.FeatureS
 	CSIPersistentVolume:                         {Default: true, PreRelease: utilfeature.Beta},
 	CustomPodDNS:                                {Default: false, PreRelease: utilfeature.Alpha},
 	BlockVolume:                                 {Default: false, PreRelease: utilfeature.Alpha},
-	StorageProtection:                           {Default: false, PreRelease: utilfeature.Alpha},
+	StorageProtection:                           {Default: true, PreRelease: utilfeature.Beta},
 	ResourceLimitsPriorityFunction:              {Default: false, PreRelease: utilfeature.Alpha},
 	SupportIPVSProxyMode:                        {Default: false, PreRelease: utilfeature.Beta},
 	SupportPodPidsLimit:                         {Default: false, PreRelease: utilfeature.Alpha},
